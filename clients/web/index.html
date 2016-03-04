@@ -13,11 +13,13 @@
     <app>
       <div class='container'>
         <div id='current'>
-          <h1>{{ current.key }}</h1>
-          <audio controls autoplay>
+          <button class='btn btn-default btn-lg' do-it> <i class='glyphicon glyphicon-play'> </i>  <strong>{{ current.key }} {{ name }}</strong></button>
+
+          <audio controls autoplay style='display: none'>
             <source>
           </audio>
         </div>
+        <br />
         <!-- {{#sounds}} -->
         <div class='row'>
           <div class='col-md-12'>
@@ -142,9 +144,26 @@
           return decodeURIComponent(results[2].replace(/\+/g, " "));
       }
 
+      var doIt = function() {
+        var currentKey = getParameterByName('key');
+
+        var name = getParameterByName('name');
+
+        if(name) {
+          andHisNameIs(decodeURIComponent(name));
+        }
+      };
+
       var render = function(root, view) {
         var output = Mustache.render(root.innerHTML, view);
         root.innerHTML = output;
+
+        bindAll('[do-it]', 'click', function(e) {
+          var self = this;
+          e.stopPropagation();
+          e.preventDefault();
+          doIt()
+        });
 
         bindAll('[play-pi]', 'click', function(e) {
           var self = this;
@@ -170,7 +189,7 @@
           var mediaUrl = self.getAttribute('play-here');
           var key = self.getAttribute('title');
 
-          var currentTitle = document.querySelector('#current h1');
+          var currentTitle = document.querySelector('#current strong');
           currentTitle.innerHTML = key;
           history.pushState(null, null, '?key='+key);
           play(mediaUrl);
@@ -194,7 +213,6 @@
         });
 
         var currentKey = getParameterByName('key');
-        console.log(currentKey);
 
 
         var name = getParameterByName('name');
@@ -204,6 +222,8 @@
         }
 
         view.current = view.soundsMap[currentKey];
+
+        view.name = getParameterByName('name');
 
         render(root, view);
       });

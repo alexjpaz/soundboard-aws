@@ -6,10 +6,10 @@ deploy:
   access_key_id: AKIAJSPSM4LGFEO7QAQQ
   secret_access_key:
     secure: ueYfpAL1xZK+h4tl4b2JBwTTmY6nODkNTt2zbyhAuApXyJlsyA0Z1hbOGbKp/iwCJnwHzAHH7dGqZSZzk47j4lonoGxHVhjMwKp9m/TjRA0JGuwq+uqeIY0L8xiU7mirCQXljeQRs+APu2jFlQG2MDu3ozX4xKQgCmKS78Au5buiHqLbHGIZvIQ/SCBmdlQreX9+BdEMDnKNvVKCU2pgkUfwsD+us9gE6jExUt0aDK1vdy9jAW/rkBJ1CxlSoeCQPSWOh54IWO5PEALiLfIBOwU1/ltClGy93YLxtzcPahGbhr1mdlZjOC0E1quwlByx9whACKjIvqFrp61sRZXm1QUApx8srpSfpImV91JXebtegZt4nKnKdxm7+jwln3Cnk8TEF4HmU8lFGLKvK4mSsnRx6Uilw7QGZFFT2LsqSDnieaYGIgmjNNFy0pWYqmFZR9Sb0smljf70XhFoyGZ4iFO3sEPLTt8UngSxm1MzVw7mhKdbXSx7ThxKDO8aJQeuyRj2PssWF2SVqnZ2EHCXRaOWGNzkVRkL76xXGG1/rEl8s0fQm9Q2dbiOM3xSCbQd0xNIcGyBmYOA9TOTQNyR+cBN1aoTCZwEMFmcNIJaTfkbzBxDfcJTmWjr8t2b9bHZ5lq7GkwbqDX56UT4uP00yvwj5ztkBhJOmhiWhNW9XHc=
-  bucket: liftit-sheets
+  bucket: soundboard.alexjpaz.com
   cache_control: "max-age=3600"
   skip_cleanup: true
   local-dir: dist
   acl: public_read
   on:
-    repo: alexjpaz/liftit-sheets
+    repo: alexjpaz/soundboard

@@ -1,6 +1,4 @@
-language: node_js
-node_js:
-- '5.3'
+install: make
 deploy:
   provider: s3
   access_key_id: AKIAJSPSM4LGFEO7QAQQ

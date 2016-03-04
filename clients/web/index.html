@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Soundboard</title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  </head>
+  <body>
+    <app>
+      <div class='container'>
+        <div id='current'>
+          <h1>{{ current.key }}</h1>
+          <audio controls autoplay>
+            <source>
+          </audio>
+        </div>
+        <!-- {{#sounds}} -->
+        <div class='row'>
+          <div class='col-md-12'>
+            <div class='sound'>
+              <span class='pull-right'>
+                <a href='https://1cymxr59n5.execute-api.us-east-1.amazonaws.com/prod/soundboard/{{ key }}' play-pi target='_blank' class='btn btn-default btn-no-border btn-xs'>
+                  <i class='glyphicon glyphicon-cloud'> </i>
+                  <span class='hidden-xs'> send to pi</span>
+                </a>
+              </span>
+              <a href='?key={{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='btn btn-block btn-xs text-align-left'>
+                <i class='glyphicon glyphicon-play'> </i>
+                <span>{{ key }}</span>
+              </a>
+              <!--<a href='{{ mediaUrl }}' target='_blank' class='btn btn-link btn-xs text-muted'>download</a>-->
+            </div>
+          </div>
+        </div>
+        <!-- {{/sounds}} -->
+      </div>
+    </app>
+    <style>
+      .btn-link-
+      .btn-no-border { border: 0; }
+      .text-align-left { text-align: left; }
+      .text-align-right { text-align: right; }
+      .sound  {
+        border-top: 1px solid #eee;
+          padding: 8px 0;
+      }
+    </style>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
+    <script>
+      var soundboardMediaUrl = "http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com/";
+
+      var root = document.querySelector('app');
+
+      var ajax = function(method, url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.onload = function() {
+          callback(JSON.parse(this.responseText));
+        };
+        xhr.send();
+      };
+
+      var view = {
+        sounds: [],
+        soundsMap: {}
+      };
+
+      var bindAll = function(selector, event, handler) {
+        var nodes = document.querySelectorAll(selector);
+        var arr = Array.prototype.slice.call(nodes);
+
+        arr.forEach(function(node) {
+          node.addEventListener(event, function(e) {
+            handler.call(node, e);
+          }, true);
+        });
+      };
+
+      var play = function(mediaUrl) {
+        //var audio = new Audio(mediaUrl);
+        //audio.play();
+        var audio = document.querySelector('#current audio');
+        var audioSource = document.querySelector('#current audio source');
+        audioSource.setAttribute('src', mediaUrl);
+        audio.load();
+        audio.play();
+      };
+
+      var render = function(root, view) {
+        var output = Mustache.render(root.innerHTML, view);
+        root.innerHTML = output;
+
+        bindAll('[play-pi]', 'click', function(e) {
+          var self = this;
+          e.stopPropagation();
+          e.preventDefault();
+
+          self.querySelector('i').classList[1] = 'glyphicon-option-horizontal';
+
+          var href = self.getAttribute('href');
+          var script = document.createElement('script');
+          script.src = href;
+          script.onload = function() {
+            console.log('1');
+          };
+          document.body.appendChild(script);
+        });
+
+        bindAll('[play-here]', 'click', function(e) {
+          var self = this;
+          e.stopPropagation();
+          e.preventDefault();
+
+          var mediaUrl = self.getAttribute('play-here');
+          var key = self.getAttribute('title');
+
+          var currentTitle = document.querySelector('#current h1');
+          currentTitle.innerHTML = key;
+          history.pushState(null, null, '?key='+key);
+          play(mediaUrl);
+        });
+
+
+        play(view.current.mediaUrl);
+      };
+
+      ajax('GET', soundboardMediaUrl + 'index.json', function(data) {
+
+        data.forEach(function(soundKey) {
+          var sound = {
+            key: soundKey,
+            mediaUrl: soundboardMediaUrl + soundKey
+          };
+
+          view.sounds.push(sound);
+
+          view.soundsMap[soundKey] = sound;
+        });
+
+        var currentKey = location.search.replace('?key=', '');
+
+
+        view.current = view.soundsMap[currentKey];
+
+        render(root, view);
+      });
+    </script>
+  </body>
+</html>

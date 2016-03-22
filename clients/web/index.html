@@ -60,6 +60,14 @@
     <script>
       var soundboardMediaUrl = "http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com/";
 
+      var sounds = {
+        load: function(sound) {
+          var audio = new Audio(soundboardMediaUrl+sound);
+          audio.load();
+          return audio;
+        }
+      };
+
       var root = document.querySelector('app');
 
       var ajax = function(method, url, callback) {
@@ -106,6 +114,56 @@
             handler.call(node, e);
           }, true);
         });
+      };
+
+
+
+      window.announceWinner = function(winner) {
+        var winAudio = sounds.load('chop/ssb/win1');
+        sounds.load('chop/ssb/winner');
+        setTimeout(function() {
+          announce(winner, 'chop/ssb/winner');
+          }, 500);
+        winAudio.play();
+      };
+
+      window.announce = function(text, start, end) {
+        var startAudio = null, endAudio = null;
+
+        if(start) {
+          startAudio = new Audio(soundboardMediaUrl+start);
+          startAudio.load();
+        }
+
+        if(end) {
+          endAudio = new Audio(soundboardMediaUrl+end);
+          endAudio.load();
+        }
+
+
+        if(start) {
+          startAudio.play();
+          startAudio.addEventListener("ended", function() {
+            speak(text, function() {
+              endAudio.play();
+              });
+              }, false);
+          } else {
+              speak(text);
+        }
+      };
+
+      window.versus = function(name1, name2) {
+        var vsAudio = new Audio(soundboardMediaUrl+"chop/ssb/vs");
+        vsAudio.load();
+
+        speak(name1, function() {
+          vsAudio.play();
+          vsAudio.addEventListener("ended", function() {
+            speak(name2);
+          }, false);
+        });
+
       };
 
       window.andHisNameIs = function(name) {
@@ -201,6 +259,30 @@
         play(view.current.mediaUrl);
       };
 
+      function execute() {
+        var name = getParameterByName('name');
+
+        if(name) {
+          andHisNameIs(decodeURIComponent(name));
+        }
+
+        var vs = getParameterByName('vs');
+
+        if(vs) {
+          var names = decodeURIComponent(vs).split(',');
+          versus(names[0],names[1])
+        }
+
+        var winner = getParameterByName('winner');
+
+        if(winner) {
+          announceWinner(decodeURIComponent(winner));
+        }
+      }
+
+      function chopVs(name) {
+      }
+
       ajax('GET', soundboardMediaUrl + 'index.json', function(data) {
 
         data.forEach(function(soundKey) {
@@ -216,12 +298,7 @@
 
         var currentKey = getParameterByName('key');
 
-
-        var name = getParameterByName('name');
-
-        if(name) {
-          andHisNameIs(decodeURIComponent(name));
-        }
+        execute();
 
         view.current = view.soundsMap[currentKey];
 

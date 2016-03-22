@@ -203,15 +203,7 @@
       }
 
       var doIt = function() {
-        var currentKey = getParameterByName('key');
-
-        var name = getParameterByName('name');
-
-        if(name) {
-          andHisNameIs(decodeURIComponent(name));
-        } else {
-          play(view.current.mediaUrl);
-        }
+        execute();
       };
 
       var render = function(root, view) {
@@ -278,6 +270,10 @@
         if(winner) {
           announceWinner(decodeURIComponent(winner));
         }
+
+        if(view.current) {
+          play(view.current.mediaUrl);
+        }
       }
 
       function chopVs(name) {
@@ -298,14 +294,16 @@
 
         var currentKey = getParameterByName('key');
 
-        execute();
 
         view.current = view.soundsMap[currentKey];
 
         view.name = getParameterByName('name');
 
+        execute();
+
         render(root, view);
+
       });
     </script>
-  </body>
+    </body>
 </html>

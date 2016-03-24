@@ -58,11 +58,21 @@
     </style>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
     <script>
+      var config = {
+        winnerSoundVolume: 0.5,
+        winnerSpeechVolume: 1
+      };
+
+      if(window.localStorage) {
+        config = JSON.parse(window.localStorage.getItem("config")) || config;
+      }
+
       var soundboardMediaUrl = "http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com/";
 
       var sounds = {
         load: function(sound) {
           var audio = new Audio(soundboardMediaUrl+sound);
+          audio.src = soundboardMediaUrl+sound;
           audio.load();
           return audio;
         }
@@ -84,18 +94,12 @@
         soundsMap: {}
       };
 
-      speechSynthesis.onvoiceschanged = function() {
-        var msg = new SpeechSynthesisUtterance();
-        msg.voice = this.getVoices().filter(v => v.name == 'Cellos')[0];
-        msg.text = name;
-      };
-
       var speak =  function speak(text, callback) {
-        var msg = new SpeechSynthesisUtterance();
+        var msg = new SpeechSynthesisUtterance(text);
         var voices = speechSynthesis.getVoices();
         msg.voice = voices[0];
         msg.voiceURI = 'native';
-        msg.volume = 1;
+        msg.volume = config.winnerSpeechVolume || 1;
         msg.rate = 0.75;
         msg.pitch = 1;
         msg.text = text;
@@ -121,6 +125,7 @@
       window.announceWinner = function(winner) {
         var winAudio = sounds.load('chop/ssb/win1');
         sounds.load('chop/ssb/winner');
+        winAudio.volume = config.winnerSoundVolume
         setTimeout(function() {
           announce(winner, 'chop/ssb/winner');
           }, 500);
@@ -133,11 +138,13 @@
         if(start) {
           startAudio = new Audio(soundboardMediaUrl+start);
           startAudio.load();
+          startAudio.volume = config.winnerSoundVolume
         }
 
         if(end) {
           endAudio = new Audio(soundboardMediaUrl+end);
           endAudio.load();
+          endAudio.volume = config.winnerSoundVolume
         }
 
 
@@ -170,7 +177,6 @@
         var startAudio = new Audio(soundboardMediaUrl+"chop/john_cena/start");
         var endAudio = new Audio(soundboardMediaUrl+"chop/john_cena/end");
 
-
         startAudio.load();
         endAudio.load();
 
@@ -202,9 +208,7 @@
           return decodeURIComponent(results[2].replace(/\+/g, " "));
       }
 
-      var doIt = function() {
-        execute();
-      };
+      var doIt = execute;
 
       var render = function(root, view) {
         var output = Mustache.render(root.innerHTML, view);
@@ -248,7 +252,7 @@
         });
 
 
-        play(view.current.mediaUrl);
+        //play(view.current.mediaUrl);
       };
 
       function execute() {

@@ -14,7 +14,6 @@
       <div class='container'>
         <div id='current'>
           <button class='btn btn-default btn-lg' do-it> <i class='glyphicon glyphicon-play'> </i>  <strong>{{ current.key }} {{ name }}</strong></button>
-
           <audio controls autoplay style='display: none'>
             <source>
           </audio>
@@ -124,10 +123,11 @@
       };
 
       soundboard.everyday = function(doWhat) {
-        var audio1 = sounds.load('hey');
-        var audio2 = sounds.load('chop/everyday');
-
         soundboard.announce(doWhat, 'hey', 'chop/everyday');
+      };
+
+      soundboard.everydayWeed = function(doWhat) {
+        soundboard.announce(doWhat, 'hey', 'chop/weed');
       };
 
       soundboard.announceWinner = function(winner) {
@@ -282,6 +282,7 @@
         doIf('name', soundboard.andHisNameIs);
         doIf('winner', soundboard.announceWinner);
         doIf('everyday', soundboard.everyday);
+        doIf('everydayWeed', soundboard.everydayWeed);
 
         if(view.current) {
           play(view.current.mediaUrl);

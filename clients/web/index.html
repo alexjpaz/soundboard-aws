@@ -58,6 +58,7 @@
     </style>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
     <script>
+      var soundboard = {};
       var config = {
         winnerSoundVolume: 0.5,
         winnerSpeechVolume: 1
@@ -109,6 +110,8 @@
         speechSynthesis.speak(msg);
       }
 
+      soundboard.speak = speak
+
       var bindAll = function(selector, event, handler) {
         var nodes = document.querySelectorAll(selector);
         var arr = Array.prototype.slice.call(nodes);
@@ -120,19 +123,24 @@
         });
       };
 
+      soundboard.everyday = function(doWhat) {
+        var audio1 = sounds.load('hey');
+        var audio2 = sounds.load('chop/everyday');
 
+        soundboard.announce(doWhat, 'hey', 'chop/everyday');
+      };
 
-      window.announceWinner = function(winner) {
+      soundboard.announceWinner = function(winner) {
         var winAudio = sounds.load('chop/ssb/win1');
         sounds.load('chop/ssb/winner');
         winAudio.volume = config.winnerSoundVolume
         setTimeout(function() {
-          announce(winner, 'chop/ssb/winner');
+          soundboard.announce(winner, 'chop/ssb/winner');
           }, 500);
         winAudio.play();
       };
 
-      window.announce = function(text, start, end) {
+      soundboard.announce = function(text, start, end) {
         var startAudio = null, endAudio = null;
 
         if(start) {
@@ -152,7 +160,9 @@
           startAudio.play();
           startAudio.addEventListener("ended", function() {
             speak(text, function() {
-              endAudio.play();
+              if(endAudio) {
+                endAudio.play();
+              }
               });
               }, false);
           } else {
@@ -160,7 +170,7 @@
         }
       };
 
-      window.versus = function(name1, name2) {
+      soundboard.versus = function(name1, name2) {
         var vsAudio = new Audio(soundboardMediaUrl+"chop/ssb/vs");
         vsAudio.load();
 
@@ -173,7 +183,7 @@
 
       };
 
-      window.andHisNameIs = function(name) {
+      soundboard.andHisNameIs = function(name) {
         var startAudio = new Audio(soundboardMediaUrl+"chop/john_cena/start");
         var endAudio = new Audio(soundboardMediaUrl+"chop/john_cena/end");
 
@@ -256,24 +266,22 @@
       };
 
       function execute() {
-        var name = getParameterByName('name');
+        var doIf = function(param, fn) {
+          var value = getParameterByName(param);
 
-        if(name) {
-          andHisNameIs(decodeURIComponent(name));
-        }
+          if(value) {
+            fn(decodeURIComponent(value));
+          }
+        };
 
-        var vs = getParameterByName('vs');
+        doIf('vs', function(value) {
+          var names = decodeURIComponent(value).split(',');
+          soundboard.versus(names[0],names[1])
+        });
 
-        if(vs) {
-          var names = decodeURIComponent(vs).split(',');
-          versus(names[0],names[1])
-        }
-
-        var winner = getParameterByName('winner');
-
-        if(winner) {
-          announceWinner(decodeURIComponent(winner));
-        }
+        doIf('name', soundboard.andHisNameIs);
+        doIf('winner', soundboard.announceWinner);
+        doIf('everyday', soundboard.everyday);
 
         if(view.current) {
           play(view.current.mediaUrl);

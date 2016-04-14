@@ -68,7 +68,6 @@
         config = JSON.parse(window.localStorage.getItem("config")) || config;
       }
 
-      speechSynthesis.onvoiceschanged = function() {};
 
       var soundboardMediaUrl = "http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com/";
 
@@ -126,18 +125,20 @@
       };
 
       soundboard.say = function(text, voice) {
-        var msg = new SpeechSynthesisUtterance(text);
-        var voices = speechSynthesis.getVoices();
-        msg.voice = voices.filter(function(v) {
-          return v.name == voice
-        })[0];
-        msg.voiceURI = 'native';
-        msg.volume = config.winnerSpeechVolume || 1;
-        msg.rate = 0.75;
-        msg.pitch = 1;
-        msg.text = text;
-        msg.lang = 'en-US';
-        speechSynthesis.speak(msg);
+        speechSynthesis.onvoiceschanged = function() {
+          var msg = new SpeechSynthesisUtterance(text);
+          var voices = speechSynthesis.getVoices();
+          msg.voice = voices.filter(function(v) {
+            return v.name == voice
+          })[0];
+          msg.voiceURI = 'native';
+          msg.volume = config.winnerSpeechVolume || 1;
+          msg.rate = 0.75;
+          msg.pitch = 1;
+          msg.text = text;
+          msg.lang = 'en-US';
+          speechSynthesis.speak(msg);
+        }
       };
 
       soundboard.everyday = function(doWhat) {

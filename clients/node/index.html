@@ -1,0 +1,11 @@
+
+<h1>lol</h1>
+<iframe id='butts'></iframe>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  var iframe = document.querySelector('iframe');
+  var socket = io();
+  socket.on('message', function(data) {
+    iframe.setAttribute('src', data.url);
+  });
+</script>

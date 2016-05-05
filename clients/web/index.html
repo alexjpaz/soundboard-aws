@@ -3,56 +3,76 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Soundboard</title>
-
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css"  media="screen,projection"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   </head>
   <body>
-    <app>
-      <div class='container'>
-        <div id='current'>
-          <button class='btn btn-default btn-lg' do-it> <i class='glyphicon glyphicon-play'> </i>  <strong>{{ current.key }} {{ name }}</strong></button>
-          <audio controls autoplay style='display: none'>
-            <source>
-          </audio>
+      <header class='light-blue white-text z-depth-1'>
+        <strong>Soundboard</strong>
+      </header>
+      <main>
+        <div class="collection z-depth-1">
+          <!-- {{#sounds}} -->
+          <a href='{{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='collection-item blue-text waves-effect  a--fill text-align-left'>
+            <i class='material-icons'>play_arrow</i>
+            <span>{{ key }}</span>
+          </a>
+          <!-- {{/sounds}} -->
         </div>
-        <br />
-        <!-- {{#sounds}} -->
-        <div class='row'>
-          <div class='col-md-12'>
-            <div class='sound'>
-              <span class='pull-right'>
-                <a href='https://1cymxr59n5.execute-api.us-east-1.amazonaws.com/prod/soundboard/{{ key }}' play-pi target='_blank' class='btn btn-default btn-no-border btn-xs'>
-                  <i class='glyphicon glyphicon-cloud'> </i>
-                  <span class='hidden-xs'> send to pi</span>
-                </a>
-              </span>
-              <a href='?key={{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='btn btn-block btn-xs text-align-left'>
-                <i class='glyphicon glyphicon-play'> </i>
-                <span>{{ key }}</span>
-              </a>
-              <!--<a href='{{ mediaUrl }}' target='_blank' class='btn btn-link btn-xs text-muted'>download</a>-->
+      </main>
+      <footer class='grey lighten-3 z-depth-3'>
+        <div class="row valign-wrapper">
+            <div class="col s10">
+              <strong class='soundboard__control-text'>Please select an action</strong>
+            </div>
+            <div class="col s2" play-current>
+              <i class='material-icons valign waves-effect' play-current>play_arrow</i>
             </div>
           </div>
         </div>
-        <!-- {{/sounds}} -->
-      </div>
-    </app>
+      </footer>
+      <audio controls autoplay style='display: none'>
+        <source>
+      </audio>
     <style>
-      .btn-link-
-      .btn-no-border { border: 0; }
-      .text-align-left { text-align: left; }
-      .text-align-right { text-align: right; }
-      .sound  {
-        border-top: 1px solid #eee;
-          padding: 8px 0;
+      body {
+        max-width: 320px;
+        margin: 0 auto;
+      }
+      main {
+        padding-bottom: 36px;
       }
 
-      app {
-        display: block;
-        margin-bottom: 40px;
+      main > .collection {
+        margin-top: 0;
+      }
+
+      footer {
+        max-width: 320px;
+        z-index: 100;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+      }
+
+      footer {
+        padding: 14px 14px;
+      }
+
+      header {
+        max-width: 320px;
+        z-index: 100;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        padding: 14px 14px;
+      }
+
+      footer .row {
+        margin: 0;
       }
     </style>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
@@ -80,7 +100,7 @@
         }
       };
 
-      var root = document.querySelector('app');
+      var root = document.querySelector('main');
 
       var ajax = function(method, url, callback) {
         var xhr = new XMLHttpRequest();
@@ -125,19 +145,25 @@
       };
 
       soundboard.say = function(text, voice) {
-        speechSynthesis.onvoiceschanged = function() {
-          var msg = new SpeechSynthesisUtterance(text);
-          var voices = speechSynthesis.getVoices();
-          msg.voice = voices.filter(function(v) {
-            return v.name == voice
-          })[0];
-          msg.voiceURI = 'native';
-          msg.volume = config.winnerSpeechVolume || 1;
-          msg.rate = 0.75;
-          msg.pitch = 1;
-          msg.text = text;
-          msg.lang = 'en-US';
-          speechSynthesis.speak(msg);
+        if(speechSynthesis.onvoiceschanged == null) {
+
+          speechSynthesis.onvoiceschanged = function() {
+            var msg = new SpeechSynthesisUtterance(text);
+            var voices = speechSynthesis.getVoices();
+            msg.voice = voices.filter(function(v) {
+              return v.name == voice
+            })[0];
+            msg.voiceURI = 'native';
+            msg.volume = config.winnerSpeechVolume || 1;
+            msg.rate = 0.75;
+            msg.pitch = 1;
+            msg.text = text;
+            msg.lang = 'en-US';
+            speechSynthesis.speak(msg);
+          }
+
+        } else {
+          speechSynthesis.onvoiceschanged();
         }
       };
 
@@ -218,10 +244,8 @@
       };
 
       var play = function(mediaUrl) {
-        //var audio = new Audio(mediaUrl);
-        //audio.play();
-        var audio = document.querySelector('#current audio');
-        var audioSource = document.querySelector('#current audio source');
+        var audio = document.querySelector('audio');
+        var audioSource = document.querySelector('audio source');
         audioSource.setAttribute('src', mediaUrl);
         audio.load();
         audio.play();
@@ -237,17 +261,14 @@
           return decodeURIComponent(results[2].replace(/\+/g, " "));
       }
 
-      var doIt = execute;
-
       var render = function(root, view) {
         var output = Mustache.render(root.innerHTML, view);
         root.innerHTML = output;
 
-        bindAll('[do-it]', 'click', function(e) {
-          var self = this;
+        bindAll('[play-current]', 'click', function(e) {
           e.stopPropagation();
           e.preventDefault();
-          doIt()
+          execute()
         });
 
         bindAll('[play-pi]', 'click', function(e) {
@@ -274,15 +295,17 @@
           var mediaUrl = self.getAttribute('play-here');
           var key = self.getAttribute('title');
 
-          var currentTitle = document.querySelector('#current strong');
-          currentTitle.innerHTML = key;
           history.pushState(null, null, '?key='+key);
           play(mediaUrl);
+          updateCurrent("Play Sound", key)
         });
 
-
-        //play(view.current.mediaUrl);
       };
+
+      function updateCurrent(title, text) {
+        $('.soundboard__control-title').html(title);
+        $('.soundboard__control-text').html(text)
+      }
 
       function execute() {
         var doIf = function(param, fn) {
@@ -290,6 +313,7 @@
 
           if(value) {
             fn(decodeURIComponent(value));
+            updateCurrent(null, param + " " + value);
           }
         };
 
@@ -302,6 +326,7 @@
         doIf('winner', soundboard.announceWinner);
         doIf('everyday', soundboard.everyday);
         doIf('everydayWeed', soundboard.everydayWeed);
+
 
         doIf('say', function(value) {
           var voice = getParameterByName('voice') || "default";
@@ -342,5 +367,7 @@
 
       });
     </script>
-    </body>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+  </body>
 </html>

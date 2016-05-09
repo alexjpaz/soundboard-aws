@@ -16,9 +16,8 @@
       <main>
         <div class="collection z-depth-1">
           <!-- {{#sounds}} -->
-          <a href='{{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='collection-item blue-text waves-effect  a--fill text-align-left'>
-            <i class='material-icons'>play_arrow</i>
-            <span>{{ key }}</span>
+          <a href='{{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='collection-item blue-text waves-effect  a--fill left-align'>
+            <i class='material-icons'>play_arrow</i> <span>{{ key }}</span>
           </a>
           <!-- {{/sounds}} -->
         </div>
@@ -29,7 +28,7 @@
               <strong class='soundboard__control-text'>Please select an action</strong>
             </div>
             <div class="col s2" play-current>
-              <i class='material-icons valign waves-effect' play-current>play_arrow</i>
+              <i class='material-icons valign waves-effect right-align' play-current>play_arrow</i>
             </div>
           </div>
         </div>
@@ -39,10 +38,11 @@
       </audio>
     <style>
       body {
-        max-width: 320px;
+        width: 100%;
         margin: 0 auto;
       }
       main {
+        padding-top: 49px;
         padding-bottom: 36px;
       }
 
@@ -51,7 +51,6 @@
       }
 
       footer {
-        max-width: 320px;
         z-index: 100;
         width: 100%;
         position: fixed;
@@ -63,7 +62,6 @@
       }
 
       header {
-        max-width: 320px;
         z-index: 100;
         width: 100%;
         position: fixed;

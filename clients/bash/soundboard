@@ -1,0 +1,96 @@
+#!/bin/bash
+
+#set -x
+
+CMD=$1
+
+if [ -z "$2" ]; then
+  CMD=play
+  ARGS=$1
+else
+  shift
+  ARGS=$@
+fi
+
+SOUNDBOARD_API_KEY=$SOUNDBOARD_API_KEY
+SOUNDBOARD_API_URL="https://iklx0jakwe.execute-api.us-east-1.amazonaws.com/prod"
+SOUNDBOARD_MEDIA_BASEURL="http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com"
+SOUNDBOARD_PLAYER=mplayer
+
+_requires_api_key() {
+  if [ -z "$SOUNDBOARD_API_KEY" ]; then
+    echo "You must supply an api key! export SOUNDBOARD_API_KEY=<API_KEY>"
+    exit 2
+  fi
+}
+
+reindex() {
+  _requires_api_key
+  curl -X PUT \
+    -H "x-api-key:${SOUNDBOARD_API_KEY}" \
+    "${SOUNDBOARD_API_URL}/reindex"
+}
+
+list() {
+  curl -s ${SOUNDBOARD_MEDIA_BASEURL}/index
+}
+
+play() {
+  FILE=$(mktemp /tmp/soundboard.XXXX)
+  curl -s -L -o ${FILE} ${SOUNDBOARD_MEDIA_BASEURL}/${ARGS}
+  ${SOUNDBOARD_PLAYER} ${FILE}
+}
+
+upload_youtube() {
+  local name=$1
+  local url=$2
+  FILE=$(mktemp /tmp/soundboard.XXXX)
+  youtube-dl -o $FILE $2
+  upload $name $FILE.mp4
+}
+
+upload() {
+  _requires_api_key
+  local name=$1
+  local file=$2
+
+  ContentType='application/ogg'
+
+  URL=$(curl -s -X PUT \
+    -H "x-api-key:${SOUNDBOARD_API_KEY}" \
+    "${SOUNDBOARD_API_URL}/upload?key=${name}&ContentType=${ContentType}")
+
+  URL=$(echo $URL | tr -d '"')
+
+  curl -X PUT --progress-bar \
+    -H "Content-Type: ${ContentType}" \
+    -T $file \
+    ${URL}
+
+  echo "Uploaded $file to ${SOUNDBOARD_MEDIA_BASEURL}/$name"
+  reindex
+}
+
+redirect() {
+  _requires_api_key
+  local name=$1
+  local redirectUrl=$2
+
+  ContentType='text/plain'
+
+  URL=$(curl -s -X PUT \
+    -H "x-api-key:${SOUNDBOARD_API_KEY}" \
+    "${SOUNDBOARD_API_URL}/upload?ContentType=${ContentType}&key=${name}&redirectUrl=${redirectUrl}")
+
+  URL=$(echo $URL | tr -d '"')
+
+  curl -X PUT \
+    -H "x-amz-website-redirect-location: ${redirectUrl}" \
+    -H "Content-Type: text/plain" \
+    --data ${redirectUrl} \
+    ${URL}
+
+  reindex
+}
+
+$CMD $ARGS

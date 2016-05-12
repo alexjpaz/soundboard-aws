@@ -11,17 +11,23 @@
   </head>
   <body>
       <header class='light-blue white-text z-depth-1'>
-        <strong>Soundboard</strong>
+          <form class="col s12">
+            <div class="row">
+              <div class='col s6'>
+                <strong>Soundboard</strong>
+              </div>
+              <div class='col s6'>
+                <form id='search-form'>
+                  <div class='search-wrapper'>
+                    <input type='text' id='search' />
+                    <label for='search'><i class='material-icons'>search</i></label>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </form>
       </header>
       <main>
-        <div class="collection z-depth-1">
-          <!-- {{#sounds}} -->
-          <a href='{{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='collection-item blue-text waves-effect  a--fill left-align'>
-            <span>{{ key }}</span>
-            <!--<i class='material-icons secondary-content'>play_arrow</i>-->
-          </a>
-          <!-- {{/sounds}} -->
-        </div>
       </main>
       <footer class='grey lighten-3 z-depth-3'>
         <div class="row valign-wrapper">
@@ -37,6 +43,22 @@
       <audio controls autoplay style='display: none'>
         <source>
       </audio>
+
+    <script type='tmpl/mustache' id='view__main'>
+      {{> sounds__list }}
+    </script>
+
+    <script type='tmpl/mustache' id='view__sounds__list'>
+      <div class="collection z-depth-1">
+        <!-- {{#sounds}} -->
+        <a href='{{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='collection-item blue-text waves-effect  a--fill left-align'>
+          <span>{{ key }}</span>
+          <!--<i class='material-icons secondary-content'>play_arrow</i>-->
+        </a>
+        <!-- {{/sounds}} -->
+      </div>
+    </script>
+
     <style>
       body {
         width: 100%;
@@ -62,6 +84,25 @@
         padding: 14px 14px;
       }
 
+      .search-wrapper {
+        position: relative;
+        padding-right: 42px;
+      }
+
+      .search-wrapper input {
+        border: 0;
+        border: 0;
+        margin: 0;
+        height: 12px;
+        padding: 4px;
+      }
+
+      .search-wrapper i.material-icons {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
       header {
         z-index: 100;
         width: 100%;
@@ -70,10 +111,17 @@
         padding: 14px 14px;
       }
 
+      header .row {
+        margin-bottom: 0;
+      }
+
       footer .row {
         margin: 0;
       }
     </style>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
     <script>
       var soundboard = {};
@@ -261,7 +309,18 @@
       }
 
       var render = function(root, view) {
-        var output = Mustache.render(root.innerHTML, view);
+
+        function getPartial(name) {
+          return document.querySelector('#view__'+name).innerHTML;
+        }
+
+        var partials = {
+          "main": getPartial('main'),
+          "sounds__list": getPartial('sounds__list'),
+        };
+
+        var output = Mustache.render("{{>main}}", view, partials);
+
         root.innerHTML = output;
 
         bindAll('[play-current]', 'click', function(e) {
@@ -332,13 +391,42 @@
           soundboard.say(value, voice);
         });
 
-        if(view.current) {
-          play(view.current.mediaUrl);
-        }
+        doIf('key', function(value) {
+          play(view.soundsMap[value].mediaUrl);
+        });
       }
 
       function chopVs(name) {
       }
+
+      soundboard.bindKeyboard = function(root) {
+        $(window).keydown(function(e) {
+          $('#search').focus();
+        });
+
+        $('form').submit(function(e) {
+          e.preventDefault();
+
+          execute();
+        });
+
+        $('#search').keydown(function(e) {
+          setTimeout(function() {
+            var search = new RegExp(e.target.value);
+
+            var filteredView = Object.assign({}, view);
+
+            filteredView.sounds = filteredView.sounds.filter(function(sound) {
+              return search.test(sound.key);
+            });
+
+            history.pushState(null, null, '?key='+filteredView.sounds[0].key);
+
+            render(root, filteredView);
+          }, 100);
+        });
+      };
+
 
       ajax('GET', soundboardMediaUrl + 'index.json', function(data) {
 
@@ -364,9 +452,10 @@
 
         render(root, view);
 
+        soundboard.bindKeyboard(root);
       });
+
+
     </script>
-    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
   </body>
 </html>

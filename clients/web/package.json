@@ -1,0 +1,33 @@
+{
+  "name": "soundboard-web",
+  "version": "1.0.0",
+  "description": "soundboard web client",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "alexjpaz@gmail.com",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexjpaz/soundboard.git"
+  },
+  "keywords": [
+    "soundboard",
+    "chrome"
+  ],
+  "bugs": {
+    "url": "https://github.com/alexjpaz/soundboard/issues"
+  },
+  "homepage": "https://github.com/alexjpaz/soundboard#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "html-webpack-plugin": "^2.17.0",
+    "mocha": "^2.5.1",
+    "webpack": "^1.13.0",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.0"
+  }
+}

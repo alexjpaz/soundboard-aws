@@ -8,7 +8,7 @@ deploy:
   bucket: soundboard.alexjpaz.com
   cache_control: "max-age=3600"
   skip_cleanup: true
-  local-dir: dist
+  local-dir: clients/web/public
   acl: public_read
   on:
     repo: alexjpaz/soundboard

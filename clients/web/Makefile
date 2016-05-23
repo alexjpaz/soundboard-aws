@@ -1,2 +1,3 @@
-default:
-	echo hi
+build:
+	npm test
+	webpack -p

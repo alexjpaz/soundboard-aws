@@ -203,6 +203,8 @@
       };
 
       soundboard.say = function(text, voice) {
+        ga('send', 'event', 'say', 'text', text);
+        ga('send', 'event', 'say', 'voice', voice);
         if(speechSynthesis.onvoiceschanged == null) {
 
           speechSynthesis.onvoiceschanged = function() {
@@ -383,6 +385,7 @@
           if(value) {
             fn(decodeURIComponent(value));
             updateCurrent(null, param + " " + value);
+            ga('send', 'event', 'execute', param, value);
           }
         };
 

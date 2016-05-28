@@ -387,6 +387,8 @@
             updateCurrent(null, param + " " + value);
             ga('send', 'event', 'execute', param, value);
           }
+
+          ga('send', 'event', 'executeUrl', window.location.origin)
         };
 
         doIf('vs', function(value) {

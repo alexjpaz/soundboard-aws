@@ -388,7 +388,7 @@
             ga('send', 'event', 'execute', param, value);
           }
 
-          ga('send', 'event', 'executeUrl', window.location.origin)
+          ga('send', 'event', 'executeUrl', 'queryString', window.location.search);
         };
 
         doIf('vs', function(value) {

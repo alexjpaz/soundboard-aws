@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 CMD=$1
 shift
 ARGS=$@
@@ -21,8 +19,6 @@ build() {
  npm install babel-core
  npm install
  $WEBPACK -p
-
-
 }
 
 deploy() {

@@ -1,3 +1,4 @@
 dist/
 node_modules/
 clients/web/public/
+functions/soundboardSmartIndex/deploy.zip

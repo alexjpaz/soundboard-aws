@@ -1,9 +1,463 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <title>Webpack App</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Soundboard</title>
+<link rel="manifest" href="manifest.json">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css"  media="screen,projection"/>
+    <link rel="icon" type="image/png" href="//s3.amazonaws.com/misc.alexjpaz.com/soundboard.alexjpaz.com/20160519/favicons/android-chrome-192x192.png" sizes="192x192">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   </head>
   <body>
-  <script type="text/javascript" src="bundle.js"></script></body>
+      <header class='light-blue white-text z-depth-1'>
+          <form class="col s12">
+            <div class="row">
+              <div class='col s6'>
+                <strong>Soundboard</strong>
+              </div>
+              <div class='col s6'>
+                <form id='search-form'>
+                  <div class='search-wrapper'>
+                    <input type='text' id='search' />
+                    <label for='search'><i class='material-icons'>search</i></label>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </form>
+      </header>
+      <main>
+      </main>
+      <footer class='grey lighten-3 z-depth-3'>
+        <div class="row valign-wrapper">
+            <div class="col s10">
+              <strong class='soundboard__control-text'>Please select an action</strong>
+            </div>
+            <div class="col s2" play-current>
+              <i class='material-icons valign waves-effect right-align' play-current>play_arrow</i>
+            </div>
+          </div>
+        </div>
+      </footer>
+      <audio controls autoplay style='display: none'>
+        <source>
+      </audio>
+
+    <script type='tmpl/mustache' id='view__main'>
+      {{> sounds__list }}
+    </script>
+
+    <script type='tmpl/mustache' id='view__sounds__list'>
+      <div class="collection z-depth-1">
+        <!-- {{#sounds}} -->
+        <a href='{{ key }}' play-here='{{ mediaUrl }}' title='{{ key }}' class='collection-item blue-text waves-effect  a--fill left-align'>
+          <span>{{ key }}</span>
+          <!--<i class='material-icons secondary-content'>play_arrow</i>-->
+        </a>
+        <!-- {{/sounds}} -->
+      </div>
+    </script>
+
+    <style>
+      body {
+        width: 100%;
+        margin: 0 auto;
+      }
+      main {
+        padding-top: 49px;
+        padding-bottom: 36px;
+      }
+
+      main > .collection {
+        margin-top: 0;
+      }
+
+      footer {
+        z-index: 100;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+      }
+
+      footer {
+        padding: 14px 14px;
+      }
+
+      .search-wrapper {
+        position: relative;
+        padding-right: 42px;
+      }
+
+      .search-wrapper input {
+        border: 0;
+        border: 0;
+        margin: 0;
+        height: 12px;
+        padding: 4px;
+      }
+
+      .search-wrapper i.material-icons {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+
+      header {
+        z-index: 100;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        padding: 14px 14px;
+      }
+
+      header .row {
+        margin-bottom: 0;
+      }
+
+      footer .row {
+        margin: 0;
+      }
+    </style>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
+    <script>
+      var soundboard = {};
+
+      var config = {
+        winnerSoundVolume: 0.5,
+        winnerSpeechVolume: 1
+      };
+
+      if(window.localStorage) {
+        config = JSON.parse(window.localStorage.getItem("config")) || config;
+      }
+
+
+      var soundboardMediaUrl = "http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com/";
+
+      var sounds = {
+        load: function(sound) {
+          var audio = new Audio(soundboardMediaUrl+sound);
+          audio.src = soundboardMediaUrl+sound;
+          audio.load();
+          return audio;
+        }
+      };
+
+      var root = document.querySelector('main');
+
+      var ajax = function(method, url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.onload = function() {
+          callback(JSON.parse(this.responseText));
+        };
+        xhr.send();
+      };
+
+      var view = {
+        sounds: [],
+        soundsMap: {}
+      };
+
+      var speak =  function speak(text, callback) {
+        var msg = new SpeechSynthesisUtterance(text);
+        var voices = speechSynthesis.getVoices();
+        msg.voice = voices[0];
+        msg.voiceURI = 'native';
+        msg.volume = config.winnerSpeechVolume || 1;
+        msg.rate = 0.75;
+        msg.pitch = 1;
+        msg.text = text;
+        msg.lang = 'en-US';
+        msg.onend = callback;
+
+        speechSynthesis.speak(msg);
+      }
+
+      soundboard.speak = speak
+
+      var bindAll = function(selector, event, handler) {
+        var nodes = document.querySelectorAll(selector);
+        var arr = Array.prototype.slice.call(nodes);
+
+        arr.forEach(function(node) {
+          node.addEventListener(event, function(e) {
+            handler.call(node, e);
+          }, true);
+        });
+      };
+
+      soundboard.say = function(text, voice) {
+        if(speechSynthesis.onvoiceschanged == null) {
+
+          speechSynthesis.onvoiceschanged = function() {
+            var msg = new SpeechSynthesisUtterance(text);
+            var voices = speechSynthesis.getVoices();
+            msg.voice = voices.filter(function(v) {
+              return v.name == voice
+            })[0];
+            msg.voiceURI = 'native';
+            msg.volume = config.winnerSpeechVolume || 1;
+            msg.rate = 0.75;
+            msg.pitch = 1;
+            msg.text = text;
+            msg.lang = 'en-US';
+            speechSynthesis.speak(msg);
+          }
+
+        } else {
+          speechSynthesis.onvoiceschanged();
+        }
+      };
+
+      soundboard.everyday = function(doWhat) {
+        soundboard.announce(doWhat, 'hey', 'chop/everyday');
+      };
+
+      soundboard.everydayWeed = function(doWhat) {
+        soundboard.announce(doWhat, 'hey', 'chop/weed');
+      };
+
+      soundboard.announceWinner = function(winner) {
+        var winAudio = sounds.load('chop/ssb/win1');
+        sounds.load('chop/ssb/winner');
+        winAudio.volume = config.winnerSoundVolume
+        setTimeout(function() {
+          soundboard.announce(winner, 'chop/ssb/winner');
+          }, 500);
+        winAudio.play();
+      };
+
+      soundboard.announce = function(text, start, end) {
+        var startAudio = null, endAudio = null;
+
+        if(start) {
+          startAudio = new Audio(soundboardMediaUrl+start);
+          startAudio.load();
+          startAudio.volume = config.winnerSoundVolume
+        }
+
+        if(end) {
+          endAudio = new Audio(soundboardMediaUrl+end);
+          endAudio.load();
+          endAudio.volume = config.winnerSoundVolume
+        }
+
+
+        if(start) {
+          startAudio.play();
+          startAudio.addEventListener("ended", function() {
+            speak(text, function() {
+              if(endAudio) {
+                endAudio.play();
+              }
+              });
+              }, false);
+          } else {
+              speak(text);
+        }
+      };
+
+      soundboard.versus = function(name1, name2) {
+        var vsAudio = new Audio(soundboardMediaUrl+"chop/ssb/vs");
+        vsAudio.load();
+
+        speak(name1, function() {
+          vsAudio.play();
+          vsAudio.addEventListener("ended", function() {
+            speak(name2);
+          }, false);
+        });
+
+      };
+
+      soundboard.andHisNameIs = function(name) {
+        var startAudio = new Audio(soundboardMediaUrl+"chop/john_cena/start");
+        var endAudio = new Audio(soundboardMediaUrl+"chop/john_cena/end");
+
+        startAudio.load();
+        endAudio.load();
+
+        startAudio.play();
+        startAudio.addEventListener("ended", function() {
+          speak(name, function() {
+            endAudio.play();
+          });
+        }, false);
+      };
+
+      var play = function(mediaUrl) {
+        var audio = document.querySelector('audio');
+        var audioSource = document.querySelector('audio source');
+        audioSource.setAttribute('src', mediaUrl);
+        audio.load();
+        audio.play();
+      };
+
+      var getParameterByName = function getParameterByName(name, url) {
+          if (!url) url = window.location.href;
+          name = name.replace(/[\[\]]/g, "\\$&");
+          var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+              results = regex.exec(url);
+          if (!results) return null;
+          if (!results[2]) return '';
+          return decodeURIComponent(results[2].replace(/\+/g, " "));
+      }
+
+      var render = function(root, view) {
+
+        function getPartial(name) {
+          return document.querySelector('#view__'+name).innerHTML;
+        }
+
+        var partials = {
+          "main": getPartial('main'),
+          "sounds__list": getPartial('sounds__list'),
+        };
+
+        var output = Mustache.render("{{>main}}", view, partials);
+
+        root.innerHTML = output;
+
+        bindAll('[play-current]', 'click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          execute()
+        });
+
+        bindAll('[play-pi]', 'click', function(e) {
+          var self = this;
+          e.stopPropagation();
+          e.preventDefault();
+
+          self.querySelector('i').classList[1] = 'glyphicon-option-horizontal';
+
+          var href = self.getAttribute('href');
+          var script = document.createElement('script');
+          script.src = href;
+          script.onload = function() {
+            console.log('1');
+          };
+          document.body.appendChild(script);
+        });
+
+        bindAll('[play-here]', 'click', function(e) {
+          var self = this;
+          e.stopPropagation();
+          e.preventDefault();
+
+          var mediaUrl = self.getAttribute('play-here');
+          var key = self.getAttribute('title');
+
+          history.pushState(null, null, '?key='+key);
+          play(mediaUrl);
+          updateCurrent("Play Sound", key)
+        });
+
+      };
+
+      function updateCurrent(title, text) {
+        $('.soundboard__control-title').html(title);
+        $('.soundboard__control-text').html(text)
+      }
+
+      function execute() {
+        var doIf = function(param, fn) {
+          var value = getParameterByName(param);
+
+          if(value) {
+            fn(decodeURIComponent(value));
+            updateCurrent(null, param + " " + value);
+          }
+        };
+
+        doIf('vs', function(value) {
+          var names = decodeURIComponent(value).split(',');
+          soundboard.versus(names[0],names[1])
+        });
+
+        doIf('name', soundboard.andHisNameIs);
+        doIf('winner', soundboard.announceWinner);
+        doIf('everyday', soundboard.everyday);
+        doIf('everydayWeed', soundboard.everydayWeed);
+
+
+        doIf('say', function(value) {
+          var voice = getParameterByName('voice') || "default";
+          soundboard.say(value, voice);
+        });
+
+        doIf('key', function(value) {
+          play(view.soundsMap[value].mediaUrl);
+        });
+      }
+
+      function chopVs(name) {
+      }
+
+      soundboard.bindKeyboard = function(root) {
+        $(window).keydown(function(e) {
+          $('#search').focus();
+        });
+
+        $('form').submit(function(e) {
+          e.preventDefault();
+
+          execute();
+        });
+
+        $('#search').keydown(function(e) {
+          setTimeout(function() {
+            var search = new RegExp(e.target.value);
+
+            var filteredView = Object.assign({}, view);
+
+            filteredView.sounds = filteredView.sounds.filter(function(sound) {
+              return search.test(sound.key);
+            });
+
+            history.pushState(null, null, '?key='+filteredView.sounds[0].key);
+
+            render(root, filteredView);
+          }, 100);
+        });
+      };
+
+
+      ajax('GET', soundboardMediaUrl + 'index.json', function(data) {
+
+        data.forEach(function(soundKey) {
+          var sound = {
+            key: soundKey,
+            mediaUrl: soundboardMediaUrl + soundKey
+          };
+
+          view.sounds.push(sound);
+
+          view.soundsMap[soundKey] = sound;
+        });
+
+        var currentKey = getParameterByName('key');
+
+
+        view.current = view.soundsMap[currentKey];
+
+        view.name = getParameterByName('name');
+
+        execute();
+
+        render(root, view);
+
+        soundboard.bindKeyboard(root);
+      });
+
+
+    </script>
+  </body>
 </html>

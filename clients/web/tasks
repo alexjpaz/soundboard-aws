@@ -26,7 +26,7 @@ build() {
 }
 
 dockerBuild() {
-  local CIDFILE=$(mktemp /tmp/cidfile.$$$$)
+  local CIDFILE=$(mktemp /tmp/cidfile.XXXXXXXXXX)
   rm $CIDFILE
 	docker build -t alexjpaz/soundboard-client-web .
 	docker run --cidfile $CIDFILE alexjpaz/soundboard-client-web echo starting container

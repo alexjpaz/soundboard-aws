@@ -1,3 +1,6 @@
+sudo: required
+services:
+  - docker
 language: bash
 install: make
 deploy:

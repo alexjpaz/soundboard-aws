@@ -4,14 +4,20 @@ services:
 language: bash
 install: make
 deploy:
-  provider: s3
-  access_key_id: AKIAIN4GJC6ZF6WNZV7Q
-  secret_access_key:
+  - provider: s3
+    access_key_id: AKIAIN4GJC6ZF6WNZV7Q
+    secret_access_key:
     secure: EQZ1IHzkY3qVv4zZHYeG5076ureJtvzzULj1/eKB0g7AFuS885KRjw9PCka7winkGlWsEo93iRDl5zwW7Y2uySXgYyYVGP289njQJ9w/xX3lxTaQY8D/WnuYnzLxeTLJNtT/k/X0ZV/9TwTKvnhMKDNE8PalhrExFAb/+9nC5MKyvtWicWUL6+RkoW3xapVxNsxyIbMb/cfqJRz1tD9BqwWScByLZ+h8bpxUA5oYhJVAzqXPkURtesFTo86EPS0ggGgqU8NK8AAuac9jOBdpFAz4J7BpbrScyDKHgtJoVu7oxQmRqmHITOg0cEFmiHxE7ehExvfBcAk5KTrT+q6LSI2GSjuBKgy8y/7LLIM29zbYMa+JHIr9nFivpA7uVocTGGGv8/F1yOaK8qf5NslcyLRjw8zSCUrc9RdVF//HZTu9FHbwdXOUbIlw/5ldUBRThWOmU+0ANRa8hIXPphcKWQgXeT9ftDSYmmxtD9eFdajcidtVQN10kPE1eNlt6gEAggJ+IjPWmvOF26SUSpLAg3gEeXzvtYiJn7Xl4fXVXs4852zIFxrH0+A3ZfAe/WJ15jXjt19MTnn9ezl9dnyIcMRJIRFquhZSJIEALwmTxlzEcAv5imP1nUZSfXqUUwdHn8ZOQv8jTQ7z7FlhhA77v7ByDNyIj9s4S95vNCBqluE=
-  bucket: soundboard.alexjpaz.com
-  cache_control: "max-age=3600"
-  skip_cleanup: true
-  local-dir: clients/web/public
-  acl: public_read
-  on:
-    repo: alexjpaz/soundboard
+    bucket: soundboard.alexjpaz.com
+    cache_control: "max-age=3600"
+    skip_cleanup: true
+    local-dir: clients/web/public
+    acl: public_read
+    on:
+      repo: alexjpaz/soundboard
+
+  - provider: script
+    skip_cleanup: true
+    script: functions/soundboardSmartIndex/update.sh
+    on:
+      repo: alexjpaz/soundboard

@@ -29,6 +29,7 @@ deploy() {
 	 -e AWS_DEFAULT_REGION=us-east-1 \
 	 -v $PWD:/app xueshanf/awscli\
 		aws s3 cp \
+      --recursive \
 			--cache-control "max-age=3600" \
 			/app/public \
 			s3://soundboard.alexjpaz.com

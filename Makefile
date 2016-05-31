@@ -5,4 +5,5 @@ build:
 	cd functions/soundboardSmartIndex && make build
 
 deploy:
+	cd clients/web && make deploy
 	cd functions/soundboardSmartIndex && make deploy

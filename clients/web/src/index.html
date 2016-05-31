@@ -121,7 +121,16 @@
         margin: 0;
       }
     </style>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
+  ga('create', 'UA-25975548-2', 'auto');
+  ga('send', 'pageview');
+
+</script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js'></script>
@@ -138,7 +147,7 @@
       }
 
 
-      var soundboardMediaUrl = "http://soundboard.alexjpaz.com.s3-website-us-east-1.amazonaws.com/";
+      var soundboardMediaUrl = "//soundboard.alexjpaz.com/";
 
       var sounds = {
         load: function(sound) {
@@ -194,6 +203,8 @@
       };
 
       soundboard.say = function(text, voice) {
+        ga('send', 'event', 'say', 'text', text);
+        ga('send', 'event', 'say', 'voice', voice);
         if(speechSynthesis.onvoiceschanged == null) {
 
           speechSynthesis.onvoiceschanged = function() {
@@ -374,7 +385,10 @@
           if(value) {
             fn(decodeURIComponent(value));
             updateCurrent(null, param + " " + value);
+            ga('send', 'event', 'execute', param, value);
           }
+
+          ga('send', 'event', 'executeUrl', 'queryString', window.location.search);
         };
 
         doIf('vs', function(value) {

@@ -4,16 +4,6 @@ services:
 language: bash
 install: make
 deploy:
-  - provider: s3
-    access_key_id: $AWS_ACCESS_KEY_ID
-    secret_access_key: $AWS_SECRET_ACCESS_KEY
-    bucket: soundboard.alexjpaz.com
-    cache_control: "max-age=3600"
-    skip_cleanup: true
-    local-dir: clients/web/public
-    acl: public_read
-    on:
-      repo: alexjpaz/soundboard
   - provider: script
     skip_cleanup: true
     script: make deploy

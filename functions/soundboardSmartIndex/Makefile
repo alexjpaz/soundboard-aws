@@ -1,4 +1,6 @@
-default: clean
+default: build
+
+build:
 	zip deploy.zip index.js
 
 clean:

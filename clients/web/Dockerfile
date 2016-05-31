@@ -12,5 +12,3 @@ RUN npm install
 COPY . /usr/src/app/
 RUN npm test
 RUN webpack -p
-
-CMD ["echo","dummy"]

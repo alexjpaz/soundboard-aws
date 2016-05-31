@@ -30,7 +30,7 @@ deploy() {
 	 -v $PWD:/app xueshanf/awscli\
 		aws s3 cp \
 			--cache-control "max-age=3600" \
-			./public \
+			/app/public \
 			s3://soundboard.alexjpaz.com
 }
 

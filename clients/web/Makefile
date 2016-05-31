@@ -1,5 +1,5 @@
-build:
-	nvm install 5.3
-	npm install
-	npm test
-	webpack -p
+build: clean
+	./tasks dockerBuild
+
+clean:
+	rm -rf public

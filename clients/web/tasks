@@ -16,12 +16,19 @@ dev() {
 build() {
  WEBPACK=node_modules/webpack/bin/webpack.js
 
-
  npm install babel-core
  npm install
  $WEBPACK -p
 
 
+}
+
+dockerBuild() {
+  local CIDFILE=$(mktemp /tmp/cidfile.$$$$)
+  rm $CIDFILE
+	docker build -t alexjpaz/soundboard-client-web .
+	docker run --cidfile $CIDFILE alexjpaz/soundboard-client-web
+	docker cp $(cat $CIDFILE):/usr/src/app/public ./public
 }
 
 runTest() {

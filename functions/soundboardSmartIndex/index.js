@@ -3,7 +3,13 @@ var s3 = new AWS.S3();
 
 var ignore = [
   "^index.*",
-  "metadata"
+  "metadata",
+  ".well-known/.*",
+  "manifest.json",
+  "bundle.js",
+  "settings/.*",
+  "public/.*",
+  "api/.*"
 ];
 
 function testIgnore(key) {

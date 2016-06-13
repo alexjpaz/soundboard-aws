@@ -9,7 +9,7 @@ var ignore = [
   "bundle.js",
   "settings/.*",
   "public/.*",
-  "api/.*"
+  "api/.*" 
 ];
 
 function testIgnore(key) {

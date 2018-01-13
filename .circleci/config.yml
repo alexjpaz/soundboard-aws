@@ -8,12 +8,11 @@ jobs:
     docker:
       - image: circleci/node:7.10
 
-    working_directory: ~/repo
+    working_directory: ~/repo/clients/web_v2
 
     steps:
-      - run: "pwd && ls"
-      - checkout
-      - run: "pwd && ls"
+      - checkout:
+          path: ~/repo
 
       # Download and cache dependencies
       - restore_cache:

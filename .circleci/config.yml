@@ -11,6 +11,7 @@ jobs:
     working_directory: ~/repo/clients/web_v2
 
     steps:
+      - run: ls
       - checkout
 
       # Download and cache dependencies

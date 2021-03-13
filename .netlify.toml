@@ -1,0 +1,8 @@
+[build]
+    command = "echo noop"
+    publish = ".noop/"
+
+[[redirects]]
+  from = "/*"
+  to = "https://d2eyteahho7ih9.cloudfront.net/:splat"
+  status = 200
